@@ -6,6 +6,10 @@
 </head>
 
 <body>
+    <h1>Aware Alexa Project</h1>
+    <p>UCLA ECE M202 Project, Winter 2019</p>
+    <p>By Sydney Hung and Michael Lo</p>
+    <hr>
 
     <h2>Introduction</h2>
     <p>With the recent release of Amazon’s Alexa Contact and Motion Sensor API, users were able to get the status of
@@ -90,7 +94,7 @@
         doorway. If the user from zone 4 entered into zone 2, then the server would think that an user entered if
         the door was in open status. Similarly, if an user went from zone 2 to zone 4, then the server would have
         thought that the user left the room.</p>
-    <img src="images/zones.png" width="500" height="300">
+    <img src="images/zones.png" width="400" height="250">
     <p>One major problem when collecting our results was that the RSSI values being read were affected by noise.
         Readings were inconsistent and sometimes it would think the user is in a different zone because of those
         readings. For example, the user is in zone 2, but the inner sensor read a negative RSSI value, putting the user
@@ -120,11 +124,26 @@
         generate sound files every time and download it when it only needs to be done once.</p>
 
     <h2>Other materials</h2>
-    <h4>Presentation slides</h4>
-    <h4>Data</h4>
+
     <h4>Code</h4>
+    <ul>
+        <li><a href="https://github.com/sydneyhung/AwareAlexa">Github Repo</a></li>
+        <li><a href="../aware-setting/lambda/us-east-1_aware-backend/index.js">AWS Lambda</a></li>
+        <li><a href="../aware_alexa_pi_scripts/">Raspberry Pi scripts</a></li>
+        <li><a href="../smart_things_app/">SmartThings Hub</a></li>
+    </ul>
+
+    <h4>Presentation slides</h4>
+    <ul>
+        <li><a href="../slides/checkpoint_ presentation.pdf">Midterm presentation</a></li>
+        <li><a href="../slides/final_presentation.pdf">Final presentation</a></li>
+    </ul>
+
     <h4>Demonstration</h4>
-    <a href="demo.html">Demo Videos</a>
+    <ul>
+        <li><a href="demo.html">Demo Videos</a></li>
+    </ul>
+
 
     <h2>References</h2>
 
