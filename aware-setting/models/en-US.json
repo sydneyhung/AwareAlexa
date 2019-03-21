@@ -1,0 +1,94 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "project",
+      "intents": [
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": []
+        },
+        {
+          "name": "ChangeNameIntent",
+          "slots": [
+            {
+              "name": "UserName",
+              "type": "AMAZON.US_FIRST_NAME"
+            },
+            {
+              "name": "NewName",
+              "type": "AMAZON.US_FIRST_NAME"
+            }
+          ],
+          "samples": [
+            "{UserName} username {NewName}"
+          ]
+        },
+        {
+          "name": "ChangePhoneIntent",
+          "slots": [
+            {
+              "name": "UserName",
+              "type": "AMAZON.US_FIRST_NAME"
+            },
+            {
+              "name": "PhoneNumber",
+              "type": "AMAZON.PhoneNumber"
+            }
+          ],
+          "samples": [
+            "{UserName} number {PhoneNumber}"
+          ]
+        },
+        {
+          "name": "ChangeNotificationIntent",
+          "slots": [
+            {
+              "name": "UserName",
+              "type": "AMAZON.US_FIRST_NAME"
+            },
+            {
+              "name": "On_Off",
+              "type": "ON_OFF_SLOT"
+            }
+          ],
+          "samples": [
+            "{UserName} notification {On_Off}"
+          ]
+        }
+      ],
+      "types": [
+        {
+          "values": [
+            {
+              "name": {
+                "value": "off"
+              }
+            },
+            {
+              "name": {
+                "value": "on"
+              }
+            }
+          ],
+          "name": "ON_OFF_SLOT"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,106 @@
+/**
+ *  Copyright 2015 SmartThings
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License. You may obtain a copy of the License at:
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
+ *  for the specific language governing permissions and limitations under the License.
+ *
+ *  Left It Open
+ *
+ *  Author: SmartThings
+ *  Date: 2013-05-09
+ */
+ include 'asynchttp_v1'
+ 
+definition(
+    name: "Aware Door Sensor",
+    namespace: "milo168",
+    author: "Michael Lo Sydney Hung",
+    description: "To notify AWS Lambda that door has been closed/opened",
+    category: "Convenience",
+    iconUrl: "https://s3.amazonaws.com/smartapp-icons/ModeMagic/bon-voyage.png",
+    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/ModeMagic/bon-voyage%402x.png"
+)
+
+preferences {
+
+  section("Monitor multiple doors/windows") {
+    input "contact", "capability.contactSensor", multiple: true
+  }
+}
+
+def installed() {
+  log.trace "installed()"
+  subscribe()
+}
+
+def updated() {
+  log.trace "updated()"
+  unsubscribe()
+  subscribe()
+}
+
+def subscribe() {
+	//for(oneDevice in contact){
+	//	sendToAWSInstall(oneDevice.getId())
+	//}
+
+	subscribe(contact, "contact.open", doorOpen)
+	subscribe(contact, "contact.closed", doorClosed)
+}
+
+def doorOpen(evt) {
+  log.trace "doorOpen($evt.name: $evt.value)"
+  def parameters = [id: "$evt.deviceId" , msg: "open"]
+  sendToAWSStatus(parameters)
+}
+
+def doorClosed(evt) {
+  log.trace "doorClosed($evt.name: $evt.value)"
+  def parameters = [id: "$evt.deviceId", msg: "close"]
+  sendToAWSStatus(parameters)
+}
+
+/*void sendToAWSInstall(deviceId){
+		log.debug "devices to register for aws"
+        
+       def paramsHTTP = [
+			uri: "https://8txb69pmhb.execute-api.us-east-1.amazonaws.com/default/aware-backend",
+            body: ["code" : "smartThingsRegister", "deviceId" : deviceId.toString()]
+		]
+   try {
+       httpPostJson(paramsHTTP) { resp ->
+
+        log.debug "response contentType: ${resp.contentType}"
+        log.debug "response status code: ${resp.status}"
+        log.debug "response data: ${resp.data}"
+       }
+   } catch (e) {
+           log.debug "something went wrong: $e"
+   }
+}*/
+
+void sendToAWSStatus(parameters){
+	String get = parameters.msg
+	log.debug "the message is $get"
+        
+	def paramsHTTP = [
+		uri: "https://8txb69pmhb.execute-api.us-east-1.amazonaws.com/default/aware-backend",
+		body: ["code" : "smartThingsUpdate", "deviceId" : parameters.id.toString() , "contactStatus" : parameters.msg.toString()]
+	]
+	try {
+		httpPostJson(paramsHTTP) { resp ->
+
+			log.debug "response contentType: ${resp.contentType}"
+			log.debug "response status code: ${resp.status}"
+			log.debug "response data: ${resp.data}"
+		}
+	} catch (e) {
+		log.debug "something went wrong: $e"
+	}
+}
