@@ -4,143 +4,196 @@
 <head>
     <title>Aware Alexa Project</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" href="github-markdown.css">
-	<style>
-		.markdown-body {
-			box-sizing: border-box;
-			min-width: 200px;
-			max-width: 980px;
-			margin: 0 auto;
-			padding: 45px;
-		}
+    <link rel="stylesheet" href="github-markdown.css">
+    <style>
+        .markdown-body {
+            box-sizing: border-box;
+            min-width: 200px;
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 45px;
+        }
 
-		@media (max-width: 767px) {
-			.markdown-body {
-				padding: 15px;
-			}
-		}
-	</style>
+        @media (max-width: 767px) {
+            .markdown-body {
+                padding: 15px;
+            }
+        }
+    </style>
 </head>
 
 <body class="markdown-body">
     <h1>Aware Alexa Project</h1>
     <p>UCLA ECE M202 Project, Winter 2019</p>
     <p>By Sydney Hung and Michael Lo</p>
-    <hr>
 
     <h2>Introduction</h2>
-    <p>With the recent release of Amazon’s Alexa Contact and Motion Sensor API, users were able to get the status of
+    <!-- <p>With the recent release of Amazon’s Alexa Contact and Motion Sensor API, users were able to get the status of
         their sensors. Users would just need to set a routine in the Alexa app and Alexa would do something when a
         condition from the sensor is met. For example, Alexa can remind users that a door has been opened for too long
-        or she can have other routines fire up when a door opens.</p>
-	<p>The aim of this project was to have personal assistants like Alexa to be aware of an user's state and respond accordingly. For our 
-		project, we created a system that is able interpret sensor reading and keep track of users' state. We demonstrate 
-		this by letting Alexa differentiate different users as they walked into the house, and then greet them accordingly.
-	</p>
-
-
-    <h2>Problem statement</h2>
-    <p>Without additional sensors and programming customization, Alexa’s response cannot be crafted towards a specific
-        user. Alexa’s response can only be based off of sensor states. Most sensors themselves do not contain
-        information so that a specific user response can be crafted. Our project will attempt to solve this problem by
-        integrating additional sensors so that an unique response is created per user. Our project will attempt to
-        recognize users that walk through a door and have a special play depending on which user goes through the door.
+        or she can have other routines fire up when a door opens.</p> -->
+    <p>The aim of this project is to have personal assistants like Alexa to be aware of an user's state and respond
+        accordingly. For our project, we created a system that is able interpret sensor reading and keep track of users'
+        state. We demonstrate this by letting Alexa differentiate different users as they walked into the house, and
+        then greet them accordingly.
     </p>
 
 
-    <h2>Prior work</h2>
-    <p>Before the introduction of the Contact and Motion Sensor API, smart devices manufacturers integrated their
-        devices with their own cloud services of choice. One popular smart device cloud service is SmartThings,
-        developed by Samsung. SmartThings cloud services can query devices and notify users the status of their devices
-        by sending notifications to the users phone. The service does not have a voice notification feature. Alexa
-        Contact and Motion Sensor API offers the benefit of voice services as an addition to these cloud services or as
-        a separate package for new developers. However, the APIs provided by Amazon and other smart device companies
-        cannot provide additional context of a change in status of a smart device. Third party apps developed on these
-        platforms can generate additional responses but not as detailed as what our project will attempt. As an example,
-        the NotifyMe app written for Alexa can let users know how long a contact sensor has been left open by allowing
-        the user to customize how long to wait before sending the notification.</p>
+    <h2>Problem statement</h2>
+    <p>Nowadays smart devices are often integrated together with cloud services. This allows an event to trigger
+        something to happen. For example, when the door is opened, it can trigger the light to turn on. However, these
+        systems are limited to a set of available sensor data, and unable to take into what happened in the past. Our
+        project focused on a system that integrates multiple sensors with with an customized AWS server. So that is
+        able to keep track of a set of finite states. And use the state to provide better context for a costumized
+        speech response.</p>
+    <!-- <p>Without additional sensors and programming customization, Alexa’s response cannot be crafted towards a specific
+        user. Alexa’s response can only be based off of sensor states. Most sensors themselves do not contain
+        information so that a specific response for user can be crafted. Our project will attempt to address this
+        problem by integrating sensors with an customized AWS server so that an unique response is created per user.
+    </p> -->
 
+
+    <h2>Prior work</h2>
+    <p>Last August, Amazon released the Contact and Motion Sensor API for Alexa. This API allows Alexa enable device
+        like Amazon Echo to query and manage smart sensors readings. However, before introduction of this API, smart
+        devices manufacturers had to integrate their devices with their own cloud services for managing sensor devices.
+        One popular smart device cloud service is SmartThings, developed by Samsung. SmartThings cloud services can
+        query devices and notify users the status of their devices by sending notifications to the users phone. However,
+        the service does not have a voice notification feature. Alexa Contact and Motion Sensor API offers the benefit
+        of a speech interfaces as an addition to these cloud services. However, the APIs provided by Amazon and other
+        smart device companies still lacks the capability to provide additional context of a change in status of a smart
+        device.</p>
 
     <h2>Technical approach</h2>
-    <p>Our approach was to use additional sensors and integrate each sensor data to our backend. We already had a door
-        sensor which could report the state of the door. The door sensor uses Z-Wave to communicate. This meant a Z-Wave
-        compliant device was needed and the SmartThings Hub was used. The door sensor would now report status and some
-        other information such as battery health to the SmartThings Hub. We needed to direct this data to our backend.
-        To do so, we wrote a custom SmartThings app that told the SmartThings Hub to send a selected door sensor’s
-        open/close status to our AWS gateway by using HTTP POST. Once our gateway received a door sensors data, it would
-        update our database which kept track of the state of the door.</p>
-    <p> For user detection, we decided to choose use Bluetooth sensing. Most users carry around a smartphone that
-        supports Bluetooth. Another benefit is that Bluetooth is short ranged meaning we can get distance readings
-        within a few meters. This can help us narrow down where the user is with respect to the door. Our user detection
-        system was done by bash scripting which ran on 2 raspberry PIs. One is the anchor which is mounted next to the
-        door sensor. The other is the inner which is to help determine if an user is leaving or entering a room. When
-        first starting up the PIs, the PIs retrieve the Bluetooth MAC addresses stored in our database in AWS through
-        HTTP POST. Once the addresses are retrieved, it would continuously poll for each of the devices by attempting to
-        connect. When it is attempting to connect, it will run another function to read the RSSI value. Once the
-        connection timeout is reached, it sends the RSSI value back to AWS through HTTP POST. Once received, the server
-        then processes the distance data. Depending on the state of the door, and the values it received from the PI’s,
-        the server will then generate a specific mp3 file and store it in a s3 bucket. The PI then retrieves the mp3 by
-        downloading it and then plays the sound file before going back to poll the user’s phone. We have setup so that
-        the inner PI plays the sound file instead.</p>
+    <p>Our approach to this project is to use a contract sensor as our door sensor and two Raspberry PIs as Bluetooth
+        sensing devices. Then combining these sensor devices with a server build on top of the AWS lambda. Putting
+        things in context, the door sensor will provide the status of a door (opened or closed); the
+        Bluetooth sensing allows us to use RSSI readings to determine an user location (inside or outside the house);
+        and the server provide the capability to manage sensor readings and store states of system.</p>
+
     <img src="images/architect.png" width="500" height="220">
-    <p> As for user inputs, the user registers their device through the Alexa app. The app will then send to the
-        server the user’s name and Bluetooth MAC address. These values are then stored into the database.</p>
+
+    <h4>Door Sensor</h4>
+    <p>In our case the door sensor producted by Ecolink uses Z-Wave to communicate. As a result a Z-Wave
+        compliant device was needed to retriving sensor data and we choose to use a SmartThings Hub for the project.
+        The door sensor would now report status and some other information such as battery health to the SmartThings
+        Hub. Then we direct this data to our backend by creating a custom SmartThings app that told the SmartThings Hub
+        to send a selected door sensor’s open/close status to our AWS gateway by using HTTP POST. Once our gateway
+        received a door sensors data, it would update our database which kept track of the state of the door.</p>
+
+    <h4>Bluetooth Sensing</h4>
+    <p> For user detection, we choose use Bluetooth sensing since most users carry around a smartphone that supports
+        Bluetooth. Another benefit of Bluetooth is that its short ranged nature allow us to get distance readings
+        within a few meters. This can help us narrow down where the user is with respect to the door. Our user detection
+        system was done by bash scripting which ran on the two raspberry PIs. For the setup, one of the raspberry pi is
+        the anchor which is mounted next to the door sensor. The other is placed inside the house to help determine if
+        an user is leaving or entering a room. When first starting up the raspberry PIs, the PIs retrieve the Bluetooth
+        MAC addresses stored in our database in AWS through HTTP POST. Once the addresses are retrieved, it would
+        continuously poll for each of the devices associat the MAC addresses by attempting to connect. While it is
+        attempting to connect, it will run another function to read the RSSI value. Once the connection timeout is
+        reached, it sends the RSSI value to the server through HTTP POST. </p>
+
+    <h4>Server</h4>
+    <p>We use AWS Lambda for creating our server. The jobs of the server are (1) to receive data coming from the door
+        sensor and raspberry PIs; (2) store the relevant data in the database, which uses AWS DynanmoDB; (3) manage and
+        keep track of users' states; and (4) create a speech response and signal an output device to play the response.
+    </p>
+    <p>The way our lambda server works is that we enabled the AWS API Gateway, which allow SmartThings hub and raspberry
+        PIs to sent readings via HTTP POST. Once a door state data is recieved, the server updates the door state
+        in the database. If a RSSI reading from our anchor raspberry PI at the door is recieved, the
+        server updates the lastest RSSI value from the ancher in the database, and use the RSSI to determine whether the
+        user is near the door. If a RSSI reading from the inner raspberry PI is recieved, the server checks the
+        historial RSSI values to see if the user has just entered or leaved the house. If the server believes the user
+        indeed entered or leaved the house, it send a costumized message in the form of text to AWS Polly,
+        which synthesizes speech based on the costumized message, and the audio file produced by Polly is post on AWS
+        S3, where a raspberry PI can then download and play it to the user.</p>
+
     <img src="images/AWS.png" width="500" height="300">
+
+    <h4>Database</h4>
+    <p>Our database is created using AWS DynanmoDB, which is a NoSQL database. The way the database is organized is that
+        one row is dictated to the state of the door (open/close), the reset of the rows is for storing user data. Each
+        user has his/her own row. Each row contain information such as user info, RSSI reading from both raspberry PIs,
+        and the location where the server think the user is. </p>
+
+    <h4>Alexa Skill</h4>
+    <p>Finally, we also created an Alexa skill which can be used to change users' information and perference in the
+        datebase. The app allow user to change their name, MAC address, and to turn on/off greetings.</p>
+
 
 
     <h2>Experimental methods</h2>
-    <p>We created some scenarios that are most likely to happen. Our experiment expectation is that an user has to be
-        transit through certain states for the correct response to happen. There are only two states that can trigger a
+    <p>We created some scenarios that are most likely to happen. Our experiment expectation is that an user has to
+        be
+        transit through certain states for the correct response to happen. There are only two states that can
+        trigger a
         voice response. Other states are invalid in which no response is generated.</p>
     <h4>Valid State 1:</h4>
     <p>The user is getting both >= 0 readings from the anchor and inner sensor and door is open. Then the user
-        transitions by going through the door in which anchor still reads >= 0 but the inner now reads &lt 0. This will
+        transitions by going through the door in which anchor still reads >= 0 but the inner now reads &lt 0. This
+        will
         generate a goodbye message for that user and play it through a speaker.</p>
     <h4>Valid State 2:</h4>
-    <p>The user is getting >= 0 from the anchor but is getting &lt 0 from the inner sensor and door is open. The user
-        then walks through the door which causes both sensors to read >= 0. This generates a welcome message for that
+    <p>The user is getting >= 0 from the anchor but is getting &lt 0 from the inner sensor and door is open. The
+        user
+        then walks through the door which causes both sensors to read >= 0. This generates a welcome message for
+        that
         user and play it through the speaker.</p>
 
 
     <h2>Analysis and results</h2>
-    <p>Our system performed as expected. When an user opens the door and walks through it, a message is generated and
-        played depending on who it is and which way did the inner sensor’s reading changed to. Our system was able to
+    <p>Our system performed as expected. When an user opens the door and walks through it, a message is generated
+        and
+        played depending on who it is and which way did the inner sensor’s reading changed to. Our system was able
+        to
         perform with multiple users too. When one person was near the door and another walked through, a message was
-        generated and played for the user that did walk through the door. When both users walked through, two separate
+        generated and played for the user that did walk through the door. When both users walked through, two
+        separate
         messages were generated and played.</p>
     <p>There were some cases which would trigger false message generations. The follow diagram illustrates the
         problem. zone 1 represents the area where inner sensor reads >= 0 RSSI values, zone 3 represents the area
         where anchor sensor reads >= 0 RSSI values, zone 2 is the overlapped area where both anchor and inner sensor
-        reads >= 0, and zone 4 represents the area where both sensors receive &lt 0 RSSI values. The yellow line is the
+        reads >= 0, and zone 4 represents the area where both sensors receive &lt 0 RSSI values. The yellow line is
+        the
         doorway. If the user from zone 4 entered into zone 2, then the server would think that an user entered if
         the door was in open status. Similarly, if an user went from zone 2 to zone 4, then the server would have
         thought that the user left the room.</p>
     <img src="images/zones.png" width="400" height="250">
     <p>One major problem when collecting our results was that the RSSI values being read were affected by noise.
         Readings were inconsistent and sometimes it would think the user is in a different zone because of those
-        readings. For example, the user is in zone 2, but the inner sensor read a negative RSSI value, putting the user
+        readings. For example, the user is in zone 2, but the inner sensor read a negative RSSI value, putting the
+        user
         in zone 3 instead. This also made our logic handling heavily dependent on the inner sensor’s placement with
-        respect to the door. If it is too far there is no overlap, if it is too close, it will take longer to generate
+        respect to the door. If it is too far there is no overlap, if it is too close, it will take longer to
+        generate
         messages.</p>
-    <p>Our system also started to feel slow when a valid event happened. This is because of the sequential operations
+    <p>Our system also started to feel slow when a valid event happened. This is because of the sequential
+        operations
         of the PI script. Since there were multiple users to scan, it did it sequentially. On top of that, for every
-        user, it had to send the reading to the server and wait for the server’s command. This made it that the period
+        user, it had to send the reading to the server and wait for the server’s command. This made it that the
+        period
         to get back to one user’s reading dependent on number of Bluetooth MAC addresses to watch for.</p>
 
 
     <h2>Future directions</h2>
     <p>We would like to improve the Bluetooth sensing algorithm. The RSSI values being read can be impacted by
         interference which we saw during our testing. This interference can cause our server’s logic to misinterpret
-        whether an user is near the door not. One way is to adjust the transmit power of the Bluetooth hardware so that
-        the user phone sees an attempt to connect at a much smaller radius. This means if the phone is in that smaller
+        whether an user is near the door not. One way is to adjust the transmit power of the Bluetooth hardware so
+        that
+        the user phone sees an attempt to connect at a much smaller radius. This means if the phone is in that
+        smaller
         radius, we are able to determine if an user is near the door or not.</p>
     <p>Instead of using range sensing, we could utilize image recognition. We could have a device recognize a user’s
         face and then tell the server who it is that walks through the door. Then we can use machine learning to
-        determine whether an user has actually walked through the door. This would let the server know whether an user
+        determine whether an user has actually walked through the door. This would let the server know whether an
+        user
         is entering or exiting a room. </p>
-    <p>Another improvement we would like to implement is response time. Currently, the system gets slower as more users
-        are added because our system handles tasks in a sequence. This means take it will take longer to get a reading
-        from the same user as it has to go through the other users. One way to fix this is that for every MAC address,
+    <p>Another improvement we would like to implement is response time. Currently, the system gets slower as more
+        users
+        are added because our system handles tasks in a sequence. This means take it will take longer to get a
+        reading
+        from the same user as it has to go through the other users. One way to fix this is that for every MAC
+        address,
         we could spawn a new bash shell to run it in parallel. There is also some delay on the server side as we
         generate sound files every time and download it when it only needs to be done once.</p>
 
@@ -173,20 +226,30 @@
 
     <h2>References</h2>
     <ul>
-        
-        <li><a href="https://developer.amazon.com/docs/smarthome/send-events-to-the-alexa-event-gateway.html">Alexa Event Gateway API</a></li>
-        <li><a href="https://developer.amazon.com/blogs/alexa/post/bda9d70c-2f0d-454d-9939-2eb82868cf35/announcing-contact-and-motion-sensor-apis-and-integration-into-alexa-routines-adding-new-home-automation-features-for-customers-and-new-opportunities-for-smart-home-developers">
+
+        <li><a href="https://developer.amazon.com/docs/smarthome/send-events-to-the-alexa-event-gateway.html">Alexa
+                Event Gateway API</a></li>
+        <li><a
+                href="https://developer.amazon.com/blogs/alexa/post/bda9d70c-2f0d-454d-9939-2eb82868cf35/announcing-contact-and-motion-sensor-aPIs-and-integration-into-alexa-routines-adding-new-home-automation-features-for-customers-and-new-opportunities-for-smart-home-developers">
                 Alexa Motion Sensor and Contact API</a></li>
-        <li><a href="https://developer.amazon.com/docs/smarthome/understand-the-smart-home-skill-api.html">Alexa Smarthome API</a></li>
-        <li><a href="https://github.com/alexa/alexa-skills-kit-sdk-for-nodejs">Alexa Skills Kit SDK for Node.js</a></li>
-        <li><a href="https://docs.aws.amazon.com/apigateway/latest/developerguide/getting-started-with-lambda-integration.html">AWS Gateway API</a></li>
+        <li><a href="https://developer.amazon.com/docs/smarthome/understand-the-smart-home-skill-api.html">Alexa
+                Smarthome API</a></li>
+        <li><a href="https://github.com/alexa/alexa-skills-kit-sdk-for-nodejs">Alexa Skills Kit SDK for Node.js</a>
+        </li>
+        <li><a
+                href="https://docs.aws.amazon.com/apigateway/latest/developerguide/getting-started-with-lambda-integration.html">AWS
+                Gateway API</a></li>
         <li><a href="https://aws.amazon.com/polly/">AWS Polly</a></li>
-        <li><a href="https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/index.html">AWS SDK for JavaScript</a></li> 
+        <li><a href="https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/index.html">AWS SDK for JavaScript</a></li>
         <li><a href="http://man.nicevoid.com/man/man1/bluetoothctl">Bluetooth control commands</a></li>
-        <li><a href="https://6tlur2di0ct3xw8lx1hkhknd-wpengine.netdna-ssl.com/wp-content/uploads/DW-Zwave-Manual-R1-01.pdf">Ecolink User Guide</a></li>
-        <li><a href="https://docs.smartthings.com/en/latest/getting-started/groovy-basics.html">SmartThings HOWTO</a></li>
+        <li><a
+                href="https://6tlur2di0ct3xw8lx1hkhknd-wpengine.netdna-ssl.com/wp-content/uploads/DW-Zwave-Manual-R1-01.pdf">Ecolink
+                User Guide</a></li>
+        <li><a href="https://docs.smartthings.com/en/latest/getting-started/groovy-basics.html">SmartThings
+                HOWTO</a>
+        </li>
         <li><a href="https://www.smartthings.com/products/smartthings-hub">SmartThings Hub</a></li>
-        
+
     </ul>
 </body>
 
